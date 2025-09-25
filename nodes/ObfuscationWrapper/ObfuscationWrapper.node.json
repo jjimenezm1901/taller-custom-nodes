@@ -1,0 +1,15 @@
+{
+    "node": "n8n-nodes-base.obfuscationWrapper",
+    "nodeVersion": "1.0",
+    "codexVersion": "1.0",
+    "categories": [
+        "Transform"
+    ],
+    "resources": {
+        "primaryDocumentation": [
+            {
+                "url": "https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/obfuscation-wrapper/"
+            }
+        ]
+    }
+}
