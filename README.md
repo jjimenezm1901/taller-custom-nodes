@@ -1,48 +1,198 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# Taller de Nodos Personalizados para n8n
 
-# n8n-nodes-starter
+Este repositorio contiene un taller práctico para crear nodos personalizados en n8n, incluyendo el nodo ObfuscationWrapper como ejemplo.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+## Prerrequisitos
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu máquina de desarrollo:
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+- **Node.js** (versión >20, preferiblemente instalado con nvm)
+- **Git**
+- **Docker Desktop**
 
-## Prerequisites
+### Instalación de Node.js con nvm (Recomendado)
 
-You need the following installed on your development machine:
+Para instalar Node.js usando nvm:
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+**Linux/Mac/WSL:**
+```bash
+# Instalar nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 
-## Using this starter
+# Reiniciar terminal o ejecutar:
+source ~/.bashrc
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+# Instalar Node.js 20
+nvm install 20
+nvm use 20
+```
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
+**Windows:**
+Descarga e instala nvm-windows desde [GitHub Releases](https://github.com/coreybutler/nvm-windows/releases). Una vez instalado, ejecuta:
+
+```bash
+# Instalar Node.js 20
+nvm install 20
+nvm use 20
+```
+
+## Configuración del Proyecto
+
+### 1. Clonar el repositorio base
+
+```bash
+git clone https://github.com/n8n-io/n8n-nodes-starter.git taller-custom-nodes
+cd taller-custom-nodes
+```
+
+### 2. Agregar el nodo ObfuscationWrapper
+
+1. Copia la carpeta `ObfuscationWrapper` (desde el comprimido compartido en SharePoint) dentro de la carpeta `nodes/`
+2. La estructura debe quedar así:
    ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
+   nodes/
+   ├── ExampleNode/
+   ├── HttpBin/
+   └── ObfuscationWrapper/
+       ├── ObfuscationWrapper.node.ts
+       ├── ObfuscationWrapper.node.json
+       └── obfuscation-icon.svg
    ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
 
-## More information
+### 3. Actualizar package.json
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+Agrega la referencia del nodo ObfuscationWrapper en el archivo `package.json`:
 
-## License
+```json
+{
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ExampleCredentialsApi.credentials.js",
+      "dist/credentials/HttpBinApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/ExampleNode/ExampleNode.node.js",
+      "dist/nodes/HttpBin/HttpBin.node.js",
+      "dist/nodes/ObfuscationWrapper/ObfuscationWrapper.node.js"
+    ]
+  }
+}
+```
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+### 4. Verificar instalación y compilar
+
+```bash
+# Verificar que Node.js esté instalado correctamente
+node --version
+npm --version
+
+# Instalar dependencias
+npm install
+
+# Compilar el proyecto
+npm run build
+```
+
+## Creación del Dockerfile
+
+El código del Dockerfile ya está incluido en el proyecto. Este archivo:
+
+- Usa la imagen base oficial de n8n
+- Clona tu repositorio de GitHub
+- Instala las dependencias necesarias
+- Compila los nodos personalizados
+- Configura n8n para usar los nodos custom
+
+## Despliegue con Docker
+
+### Opción 1: Usar tu propio repositorio
+
+1. Sube tu código a un repositorio público en GitHub
+2. Ejecuta el comando de build reemplazando las variables:
+
+```bash
+docker build --no-cache \
+  --build-arg GITHUB_REPO_URL=https://github.com/tu-usuario/tu-repo.git \
+  --build-arg GITHUB_REPO_NOMBRE=tu-repo \
+  -t n8n-custom1 .
+```
+
+### Opción 2: Usar el repositorio del taller
+
+Si prefieres usar el repositorio ya configurado:
+
+```bash
+docker build --no-cache \
+  --build-arg GITHUB_REPO_URL=https://github.com/jjimenezm1901/taller-custom-nodes.git \
+  --build-arg GITHUB_REPO_NOMBRE=taller-custom-nodes \
+  -t n8n-custom1 .
+```
+
+### Crear y ejecutar el contenedor
+
+```bash
+# Crear el contenedor
+docker run -d \
+  --name n8n-custom-container \
+  -p 5678:5678 \
+  n8n-custom1
+
+# Verificar que el contenedor esté ejecutándose
+docker ps
+```
+
+## Verificación
+
+1. Abre tu navegador y ve a `http://localhost:5678`
+2. Inicia sesión en n8n
+3. Crea un nuevo workflow
+4. Busca el nodo "ObfuscationWrapper" en la lista de nodos disponibles
+5. Si puedes ver y usar el nodo, ¡el taller se completó exitosamente!
+
+## Solución de Problemas
+
+### Error de compilación
+```bash
+# Limpiar y reinstalar dependencias
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+### Error de Docker
+```bash
+# Limpiar imágenes y contenedores
+docker system prune -a
+docker build --no-cache [argumentos...]
+```
+
+### Verificar logs del contenedor
+```bash
+docker logs n8n-custom-container
+```
+
+## Estructura del Proyecto
+
+```
+taller-custom-nodes/
+├── credentials/          # Credenciales personalizadas
+├── nodes/               # Nodos personalizados
+│   ├── ExampleNode/
+│   ├── HttpBin/
+│   └── ObfuscationWrapper/
+├── dist/                # Archivos compilados
+├── package.json         # Configuración del proyecto
+├── Dockerfile          # Configuración de Docker
+└── README.md           # Este archivo
+```
+
+## Recursos Adicionales
+
+- [Documentación oficial de n8n](https://docs.n8n.io/)
+- [Guía de creación de nodos](https://docs.n8n.io/integrations/creating-nodes/)
+- [Repositorio base n8n-nodes-starter](https://github.com/n8n-io/n8n-nodes-starter)
+
+## Licencia
+
+MIT
