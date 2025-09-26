@@ -27,6 +27,7 @@ ENV NODE_FUNCTION_ALLOW_EXTERNAL=*
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
 ENV N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom/node_modules/
 ENV N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+
 # Clonar el repositorio en /home/node/${GITHUB_REPO_NOMBRE}/custom_nodes/
 WORKDIR /home/node
 RUN git clone ${GITHUB_REPO_URL}
@@ -44,10 +45,7 @@ RUN npm install -g typescript gulp gulp-cli
 # Compila los nodos custom
 RUN npm install --include=dev --force
 RUN npx tsc && npx gulp build:icons
-RUN chown node:node /home/node/${GITHUB_REPO_NOMBRE}/n8n-custom-nodes
-
-# Compilar los nodos custom
-RUN npm run build
+RUN chown node:node /home/node/${GITHUB_REPO_NOMBRE}
 
 # Crear directorio para nodos custom
 RUN mkdir -p /home/node/.n8n/custom/node_modules
