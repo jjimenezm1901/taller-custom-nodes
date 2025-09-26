@@ -32,7 +32,7 @@ WORKDIR /home/node
 RUN git clone ${GITHUB_REPO_URL}
 
 # Instalar dependencias en el proyecto clonado
-WORKDIR /home/node/${GITHUB_REPO_NOMBRE}/n8n-custom-nodes/
+WORKDIR /home/node/${GITHUB_REPO_NOMBRE}
 RUN npm i pg
 RUN npm i --save-dev @types/pg
 RUN npm install --include=dev --force
@@ -46,13 +46,21 @@ RUN npm install --include=dev --force
 RUN npx tsc && npx gulp build:icons
 RUN chown node:node /home/node/${GITHUB_REPO_NOMBRE}/n8n-custom-nodes
 
-# Copiar los nodos custom a la carpeta de custom nodes en n8n
-RUN mkdir -p /home/node/.n8n && chown node:node /home/node/.n8n
+# Compilar los nodos custom
+RUN npm run build
 
-RUN mkdir -p /home/node/.n8n/custom/node_modules \
-    && cp -r /home/node/${GITHUB_REPO_NOMBRE}/n8n-custom-nodes /home/node/.n8n/custom/node_modules/
+# Crear directorio para nodos custom
+RUN mkdir -p /home/node/.n8n/custom/node_modules
 
+# Copiar el proyecto compilado a la ubicación correcta
+RUN cp -r /home/node/${GITHUB_REPO_NOMBRE} /home/node/.n8n/custom/node_modules/
+
+# Ajustar permisos
+RUN chown -R node:node /home/node/.n8n
+
+# Cambiar a usuario node
 USER node
+
 # Volver al directorio de trabajo predeterminado
 WORKDIR /home/node
 

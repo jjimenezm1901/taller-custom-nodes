@@ -38,7 +38,8 @@
     ],
     "nodes": [
       "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "/nodes/HttpBin/HttpBin.node.ts"
+      "dist/nodes/HttpBin/HttpBin.node.js",
+      "dist/nodes/ObfuscationWrapper/ObfuscationWrapper.node.js"
     ]
   },
   "devDependencies": {
