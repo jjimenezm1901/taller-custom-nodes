@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "roleDefinitionIds": {
+      "value": [
+        "b24988ac-6180-42a0-ab88-20f7382dd24c"
+      ]
+    },
+    "imagenN8N":{
+      "value":"tallerarqn8n.azurecr.io/n8n-custom:v1.0"
+    },
+    "n8ncustomNodesPath": {
+      "value":"/home/taller-custom-nodes"
+    },
+    "acrServer": {
+      "value": "tallerarqn8n.azurecr.io"
+    },
+    "acrUserName": {
+      "value": "tallerarqn8n"
+    }
+  }
+}

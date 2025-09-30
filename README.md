@@ -1,4 +1,4 @@
-# Taller de Nodos Personalizados para n8n
+# Taller de Arquitectura IA con n8n
 
 Este repositorio contiene un taller práctico para crear nodos personalizados en n8n, incluyendo el nodo ObfuscationWrapper como ejemplo.
 
@@ -172,6 +172,198 @@ docker login
 ```bash
 docker push xjimenezm/taller-custom-nodes:latest
 ```
+
+## Despliegue en Azure
+
+### Prerrequisitos para Azure
+
+#### Instalar Azure CLI y herramientas
+
+**Windows:**
+
+```powershell
+# Instalar Azure CLI
+winget install Microsoft.AzureCLI
+
+# Instalar Bicep CLI
+winget install Microsoft.Bicep
+
+# Instalar Azure PowerShell
+winget install Microsoft.PowerShell
+```
+
+**Linux/macOS:**
+
+```bash
+# Instalar Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# Instalar Bicep CLI
+az bicep install
+
+# Instalar Azure PowerShell
+curl -sL https://raw.githubusercontent.com/Azure/azure-cli/main/scripts/install-az-cli.sh | bash
+```
+
+#### Configurar Azure
+
+```bash
+# Autenticarse con Azure
+az login
+
+# Configurar suscripción (reemplaza con tu SUBSCRIPTION_ID)
+az account set --subscription "TU_SUBSCRIPTION_ID"
+
+# Verificar configuración
+az account show
+```
+
+### Configuración del Proyecto
+
+#### 1. Configurar parámetros de despliegue
+
+Edita el archivo `deploy-azure/main.parameters.json` con tus valores:
+
+```json
+{
+  "parameters": {
+    "imagenN8N": {
+      "value": "docker.n8n.io/n8nio/n8n:latest"
+    },
+    "n8ncustomNodesPath": {
+      "value": "/home/taller-custom-nodes/custom_nodes"
+    },
+    "acrServer": {
+      "value": "tu-registry.azurecr.io"
+    },
+    "acrUserName": {
+      "value": "tu-registry"
+    }
+  }
+}
+```
+
+#### 2. Validar el despliegue
+
+```powershell
+# Navegar al directorio de Azure
+cd deploy-azure
+
+# Validar la plantilla Bicep
+az deployment sub validate --name dev-taller --location eastus2 --template-file main.bicep --parameters main.parameters.json
+```
+
+#### 3. Ejecutar el despliegue
+
+```powershell
+# Desplegar la infraestructura con parámetros sensibles
+az deployment sub create --name dev-taller --location eastus2 --template-file main.bicep --parameters main.parameters.json --parameters databasePassword="tu-password-segura" acrPassword="tu-password-registry" n8nEncryptionKey="tu-clave-encriptacion-32-caracteres"
+```
+
+**Parámetros requeridos:**
+- `databasePassword`: Contraseña para la base de datos PostgreSQL
+- `acrPassword`: Contraseña del Azure Container Registry
+- `n8nEncryptionKey`: Clave de encriptación de 32 caracteres para n8n
+
+### Configuración de Imagen Personalizada (Opcional)
+
+Si necesitas nodos customizados, puedes crear una imagen personalizada:
+
+#### 1. Crear Azure Container Registry
+
+```powershell
+# Crear un grupo de recursos para el registry
+az group create --name rg-container-registry --location eastus
+
+# Crear Azure Container Registry
+az acr create --resource-group rg-container-registry --name tu-registry --sku Basic
+
+# Obtener credenciales del registry
+az acr credential show --name tu-registry
+```
+
+#### 2. Configurar variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```bash
+GITHUB_REPO_URL=https://github.com/tu-usuario/taller-custom-nodes.git
+GITHUB_REPO_NOMBRE=taller-custom-nodes
+```
+
+#### 3. Construir la imagen Docker
+
+```powershell
+# Cargar variables de entorno
+$GITHUB_REPO_URL = (Get-Content .env | Select-String "^GITHUB_REPO_URL=") -replace "GITHUB_REPO_URL=", ""
+$GITHUB_REPO_NOMBRE = (Get-Content .env | Select-String "^GITHUB_REPO_NOMBRE=") -replace "GITHUB_REPO_NOMBRE=", ""
+
+# Construir la imagen
+docker build --build-arg GITHUB_REPO_URL=$GITHUB_REPO_URL --build-arg GITHUB_REPO_NOMBRE=$GITHUB_REPO_NOMBRE -t n8n-custom .
+```
+
+#### 4. Subir imagen a Azure Container Registry
+
+```powershell
+# Etiquetar la imagen para Azure Container Registry
+docker tag n8n-custom tu-registry.azurecr.io/n8n-custom:v1.0
+
+# Loguearse en Azure Container Registry
+az acr login --name tu-registry
+
+# Subir la imagen
+docker push tu-registry.azurecr.io/n8n-custom:v1.0
+```
+
+#### 5. Actualizar parámetros de despliegue
+
+Actualiza los parámetros en `deploy-azure/main.parameters.json`:
+
+```json
+{
+  "parameters": {
+    "imagenN8N": {
+      "value": "tu-registry.azurecr.io/n8n-custom:v1.0"
+    },
+    "acrServer": {
+      "value": "tu-registry.azurecr.io"
+    },
+    "acrUserName": {
+      "value": "tu-registry"
+    }
+  }
+}
+```
+
+#### 6. Configurar credenciales de ACR
+
+Antes del despliegue, necesitas configurar las credenciales del Container Registry:
+
+```powershell
+# Obtener la contraseña del registry
+$acrPassword = (az acr credential show --name tu-registry --query "passwords[0].value" -o tsv)
+
+# Configurar la contraseña como parámetro (esto se hará en el despliegue)
+# Nota: Esta contraseña se debe pasar como parámetro al template Bicep
+```
+
+### Verificación del Despliegue
+
+Una vez completado el despliegue, Azure mostrará:
+
+```
+=== DESPLIEGUE COMPLETADO ===
+SERVICE_APP_URI: https://dev-taller-capp-n8n-test.xxx.azurecontainerapps.io
+WORKER_APP_URI: https://dev-taller-capp-n8n-test-worker.xxx.azurecontainerapps.io
+AZURE_KEY_VAULT_NAME: dev-taller-kv-n8n-test
+```
+
+### Acceder a N8N
+
+1. Abre la URL del `SERVICE_APP_URI` en tu navegador
+2. Configura tu cuenta de administrador
+3. Verifica que los nodos personalizados estén disponibles
+4. ¡Tu instancia de N8N con modo colas está lista para usar!
 
 ## Despliegue en Google Cloud Platform
 
