@@ -9,5 +9,5 @@ yarn.lock
 .env
 env
 ./deploy-gcp/n8n-regular/.env
-/de
 ./deploy-azure/.env
+./deploy-gcp/n8n-workers/.env
