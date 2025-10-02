@@ -42,7 +42,7 @@ var tags = { 'azd-env-name': name }
 //var prefix = '${name}-${resourceToken}'
 var prefix = name
 //var prefix = 'dev-itc-'
-var usecase = 'queue'
+var usecase = 'colas'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   //name: '${name}-resource-group'
@@ -81,7 +81,7 @@ module keyVault 'core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: resourceGroup
   params: {
-    name: 'tallern8nkvqueuev2'
+    name: 'tallern8nkvqueuev6'
     location: location
     tags: tags
   }
@@ -103,7 +103,7 @@ module postgresServer 'core/database/flexibleserver.bicep' = {
   params: {
     //name: '${prefix}-postgresql'
     name: '${prefix}-pg-${usecase}'
-    location: location
+    location: 'eastus'
     tags: tags
     sku: {
       name: 'Standard_B1ms'
@@ -472,7 +472,7 @@ module workerContainerApp 'core/host/container-app-worker.bicep' = {
       }
       {
         name: 'N8N_CONCURRENCY_PRODUCTION_LIMIT'
-        value: '25'
+        value: '20'
       }
       {
         name: 'OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS'
