@@ -312,6 +312,9 @@ cd /mnt/c/Users/i0329/Documents/projects/datapath/taller-custom-nodes
 # Navegar al directorio de despliegue
 cd deploy-gcp/n8n-regular
 
+# Convertir el formato CLRF de windows a linux (ir a la carpeta infrastructure):
+dos2unix deploy-postgresql.sh 2>/dev/null || sed -i 's/\r$//' deploy-postgresql.sh
+
 # Dar permisos de ejecución
 chmod +x deploy-regular.sh
 

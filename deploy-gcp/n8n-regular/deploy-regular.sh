@@ -173,7 +173,7 @@ gcloud run deploy "$CLOUDRUN_SERVICE_NAME_ENV" \
     --allow-unauthenticated \
     --port=5678 \
     --cpu=2 --memory=2Gi \
-    --min-instances=1 --max-instances=3 \
+    --min-instances=0 --max-instances=3 \
     --execution-environment=gen2 \
     --service-account="$SA_EMAIL" \
     --add-cloudsql-instances="$DB_CONNECTION_NAME" \
