@@ -155,11 +155,35 @@ docker build --no-cache \
   -t taller-custom-nodes .
 ```
 
-### 2. Etiquetar la imagen para Docker Hub
+### 2. Etiquetar la imagen para Docker Hub con versionado
+
+Es recomendable usar versionado semántico (SemVer) para tus imágenes. Esto te permite mantener un historial de versiones y facilitar el rollback si es necesario.
+
+**Opción A: Etiquetar con versión específica y latest**
 
 ```bash
+# Definir la versión (ejemplo: v1.0.0)
+VERSION=v1.0.0
+
+# Etiquetar con la versión específica
+docker tag taller-custom-nodes xjimenezm/taller-custom-nodes:${VERSION}
+
+# Etiquetar también como latest (opcional, pero recomendado)
 docker tag taller-custom-nodes xjimenezm/taller-custom-nodes:latest
 ```
+
+**Opción B: Etiquetar solo con versión específica**
+
+```bash
+# Etiquetar con versión específica
+docker tag taller-custom-nodes xjimenezm/taller-custom-nodes:v1.0.0
+```
+
+**Ejemplos de versionado semántico:**
+- `v1.0.0` - Versión inicial (major.minor.patch)
+- `v1.1.0` - Nueva funcionalidad (minor)
+- `v1.1.1` - Corrección de errores (patch)
+- `v2.0.0` - Cambios incompatibles (major)
 
 ### 3. Hacer login en Docker Hub
 
@@ -169,9 +193,149 @@ docker login
 
 ### 4. Subir la imagen
 
+**Si etiquetaste con versión y latest:**
+
 ```bash
+# Subir la versión específica
+docker push xjimenezm/taller-custom-nodes:${VERSION}
+
+# Subir la etiqueta latest
 docker push xjimenezm/taller-custom-nodes:latest
 ```
+
+**O subir ambas en un solo comando:**
+
+```bash
+# Subir todas las etiquetas de la imagen
+docker push xjimenezm/taller-custom-nodes:${VERSION}
+docker push xjimenezm/taller-custom-nodes:latest
+```
+
+**Si solo etiquetaste con versión específica:**
+
+```bash
+docker push xjimenezm/taller-custom-nodes:v1.0.0
+```
+
+### 5. Verificar la imagen en Docker Hub
+
+Una vez subida, puedes verificar tus imágenes en [Docker Hub](https://hub.docker.com/) y ver todas las versiones etiquetadas.
+
+## Despliegue en Google Cloud Platform
+
+### Prerrequisitos para GCP
+
+#### Instalar Google Cloud CLI
+
+**Ubuntu WSL / Linux:**
+
+```bash
+# Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar herramientas básicas
+sudo apt install -y curl wget git unzip
+
+# Instalar Google Cloud CLI
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+
+# Verificar instalación
+gcloud --version
+```
+
+**macOS:**
+
+```bash
+# Instalar con Homebrew
+brew install --cask google-cloud-sdk
+
+# O descargar desde Google Cloud
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+```
+
+**Windows:**
+
+Descarga e instala desde [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
+
+#### Configurar Google Cloud
+
+```bash
+# Autenticarse con Google Cloud
+gcloud auth login
+
+# Configurar proyecto (reemplaza con tu PROJECT_ID)
+gcloud config set project TU_PROJECT_ID
+
+# Verificar configuración
+gcloud config list
+```
+
+### Configuración del Proyecto
+
+#### 1. Crear archivo .env
+
+Crea un archivo `.env` en la raíz del proyecto con la siguiente configuración:
+
+```bash
+# Configuración del proyecto
+PROJECT_ID=tu-project-id
+REGION=us-central1
+ENVIRONMENT=dev
+
+# Configuración de Cloud Run
+CLOUDRUN_SERVICE_NAME=n8n-regular
+SERVICE_ACCOUNT_NAME=n8n-sa
+
+# Configuración de base de datos
+DB_INSTANCE_NAME=n8n-postgres
+DB_NAME=n8n
+DB_USER=n8n_user
+DB_PASSWORD=tu-password-segura
+DB_SECRET_NAME=n8n-db-password
+
+# Configuración de N8N
+N8N_ENCRYPTION_KEY=tu-clave-de-encriptacion-32-caracteres
+
+# Configuración opcional de GitHub (para nodos customizados)
+GITHUB_REPO_URL=https://github.com/jjimenezm1901/taller-custom-nodes.git
+GITHUB_REPO_NOMBRE=taller-custom-nodes
+```
+
+#### 2. Ejecutar el script de despliegue
+
+```bash
+# Navegar al directorio del proyecto
+cd /mnt/c/Users/i0329/Documents/projects/datapath/taller-custom-nodes
+
+# Navegar al directorio de despliegue
+cd deploy-gcp/n8n-regular
+
+# Dar permisos de ejecución
+chmod +x deploy-regular.sh
+
+# Ejecutar el script de despliegue
+./deploy-regular.sh
+```
+
+### Verificación del Despliegue
+
+Una vez completado el despliegue, el script mostrará:
+
+```
+=== DESPLIEGUE COMPLETADO ===
+URL: https://n8n-regular-dev-123456789.us-central1.run.app
+Servicio: n8n-regular-dev
+Región: us-central1
+```
+
+### Acceder a N8N
+
+1. Abre la URL proporcionada en tu navegador
+2. Configura tu cuenta de administrador
+3. Verifica que los nodos personalizados estén disponibles
+4. ¡Tu instancia de N8N está lista para usar!
 
 ## Despliegue en Azure
 
@@ -364,122 +528,6 @@ AZURE_KEY_VAULT_NAME: dev-taller-kv-n8n-test
 2. Configura tu cuenta de administrador
 3. Verifica que los nodos personalizados estén disponibles
 4. ¡Tu instancia de N8N con modo colas está lista para usar!
-
-## Despliegue en Google Cloud Platform
-
-### Prerrequisitos para GCP
-
-#### Instalar Google Cloud CLI
-
-**Ubuntu WSL / Linux:**
-
-```bash
-# Actualizar sistema
-sudo apt update && sudo apt upgrade -y
-
-# Instalar herramientas básicas
-sudo apt install -y curl wget git unzip
-
-# Instalar Google Cloud CLI
-curl https://sdk.cloud.google.com | bash
-exec -l $SHELL
-
-# Verificar instalación
-gcloud --version
-```
-
-**macOS:**
-
-```bash
-# Instalar con Homebrew
-brew install --cask google-cloud-sdk
-
-# O descargar desde Google Cloud
-curl https://sdk.cloud.google.com | bash
-exec -l $SHELL
-```
-
-**Windows:**
-
-Descarga e instala desde [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
-
-#### Configurar Google Cloud
-
-```bash
-# Autenticarse con Google Cloud
-gcloud auth login
-
-# Configurar proyecto (reemplaza con tu PROJECT_ID)
-gcloud config set project TU_PROJECT_ID
-
-# Verificar configuración
-gcloud config list
-```
-
-### Configuración del Proyecto
-
-#### 1. Crear archivo .env
-
-Crea un archivo `.env` en la raíz del proyecto con la siguiente configuración:
-
-```bash
-# Configuración del proyecto
-PROJECT_ID=tu-project-id
-REGION=us-central1
-ENVIRONMENT=dev
-
-# Configuración de Cloud Run
-CLOUDRUN_SERVICE_NAME=n8n-regular
-SERVICE_ACCOUNT_NAME=n8n-sa
-
-# Configuración de base de datos
-DB_INSTANCE_NAME=n8n-postgres
-DB_NAME=n8n
-DB_USER=n8n_user
-DB_PASSWORD=tu-password-segura
-DB_SECRET_NAME=n8n-db-password
-
-# Configuración de N8N
-N8N_ENCRYPTION_KEY=tu-clave-de-encriptacion-32-caracteres
-
-# Configuración opcional de GitHub (para nodos customizados)
-GITHUB_REPO_URL=https://github.com/jjimenezm1901/taller-custom-nodes.git
-GITHUB_REPO_NOMBRE=taller-custom-nodes
-```
-
-#### 2. Ejecutar el script de despliegue
-
-```bash
-# Navegar al directorio del proyecto
-cd /mnt/c/Users/i0329/Documents/projects/datapath/taller-custom-nodes
-
-# Navegar al directorio de despliegue
-cd deploy-gcp/n8n-regular
-
-# Dar permisos de ejecución
-chmod +x deploy-regular.sh
-
-# Ejecutar el script de despliegue
-./deploy-regular.sh
-```
-
-### Verificación del Despliegue
-
-Una vez completado el despliegue, el script mostrará:
-
-```
-=== DESPLIEGUE COMPLETADO ===
-URL: https://n8n-regular-dev-123456789.us-central1.run.app
-Servicio: n8n-regular-dev
-Región: us-central1
-```
-
-### Acceder a N8N
-
-1. Abre la URL proporcionada en tu navegador
-2. Configura tu cuenta de administrador
-3. Verifica que los nodos personalizados estén disponibles
-4. ¡Tu instancia de N8N está lista para usar!
 
 ## Verificación
 
