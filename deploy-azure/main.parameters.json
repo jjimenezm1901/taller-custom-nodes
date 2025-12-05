@@ -8,16 +8,16 @@
       ]
     },
     "imagenN8N":{
-      "value":"tallerarqn8n.azurecr.io/n8n-custom:v1.0"
+      "value":"n8ncustom.azurecr.io/n8n-custom:v1.0"
     },
     "n8ncustomNodesPath": {
       "value":"/home/taller-custom-nodes"
     },
     "acrServer": {
-      "value": "tallerarqn8n.azurecr.io"
+      "value": "n8ncustom.azurecr.io"
     },
     "acrUserName": {
-      "value": "tallerarqn8n"
+      "value": "n8ncustom"
     }
   }
 }

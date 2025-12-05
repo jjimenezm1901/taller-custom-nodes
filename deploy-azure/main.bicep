@@ -7,7 +7,7 @@ param name string = 'taller-n8n'
 
 @minLength(1)
 @description('Primary location for all resources')
-param location string = 'eastus'
+param location string = 'eastus2'
 
 @description('The IDs of the role definitions to assign to the managed identity.')
 param roleDefinitionIds array
@@ -42,7 +42,7 @@ var tags = { 'azd-env-name': name }
 //var prefix = '${name}-${resourceToken}'
 var prefix = name
 //var prefix = 'dev-itc-'
-var usecase = 'colas'
+var usecase = 'mode-queue'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   //name: '${name}-resource-group'
@@ -81,7 +81,7 @@ module keyVault 'core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: resourceGroup
   params: {
-    name: 'tallern8nkvqueuev6'
+    name: 'tallern8nprodv1'
     location: location
     tags: tags
   }
@@ -103,7 +103,7 @@ module postgresServer 'core/database/flexibleserver.bicep' = {
   params: {
     //name: '${prefix}-postgresql'
     name: '${prefix}-pg-${usecase}'
-    location: 'eastus'
+    location: location
     tags: tags
     sku: {
       name: 'Standard_B1ms'
