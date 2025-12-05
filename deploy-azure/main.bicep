@@ -81,7 +81,7 @@ module keyVault 'core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: resourceGroup
   params: {
-    name: 'tallern8nprodv1'
+    name: 'tallern8nprodv2'
     location: location
     tags: tags
   }
@@ -340,7 +340,7 @@ module redisCache 'core/cache/redis.bicep' = {
   }
 }
 
-var workerContainerAppName = '${prefix}-capp-${usecase}-worker'
+var workerContainerAppName = '${prefix}-capp-${usecase}-wrk'
 // Worker Container App
 module workerContainerApp 'core/host/container-app-worker.bicep' = {
   name: 'worker-container'
