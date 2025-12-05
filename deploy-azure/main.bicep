@@ -264,7 +264,7 @@ module containerApp 'core/host/container-app.bicep' = {
       }
       {
         name: 'QUEUE_BULL_REDIS_TIMEOUT_THRESHOLD'
-        value: '10000'
+        value: '60000'
       }
       {
         name: 'N8N_GRACEFUL_SHUTDOWN_TIMEOUT'

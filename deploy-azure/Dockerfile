@@ -1,5 +1,5 @@
 # Usar la imagen base oficial de n8n
-FROM n8nio/n8n:1.107.3
+FROM n8nio/n8n:1.113.1
 
 # Cambiar a usuario root para instalar herramientas globales
 USER root

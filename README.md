@@ -378,12 +378,38 @@ curl -sL https://raw.githubusercontent.com/Azure/azure-cli/main/scripts/install-
 # Autenticarse con Azure
 az login
 
+# Si se requiere autenticación multifactor (MFA), usar:
+az login --tenant TU_TENANT_ID --use-device-code
+
 # Configurar suscripción (reemplaza con tu SUBSCRIPTION_ID)
 az account set --subscription "TU_SUBSCRIPTION_ID"
 
 # Verificar configuración
 az account show
 ```
+
+#### Registrar Proveedores de Recursos
+
+Antes de desplegar la infraestructura, es necesario registrar los proveedores de recursos de Azure que se utilizarán. Esto puede tardar varios minutos:
+
+```powershell
+# Registrar proveedores de recursos necesarios
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.App
+az provider register --namespace Microsoft.DBforPostgreSQL
+az provider register --namespace Microsoft.Cache
+az provider register --namespace Microsoft.KeyVault
+az provider register --namespace Microsoft.OperationalInsights
+```
+
+**Verificar el estado de registro:**
+
+```powershell
+# Verificar estado de todos los proveedores
+az provider list --query "[?namespace=='Microsoft.ContainerRegistry' || namespace=='Microsoft.App' || namespace=='Microsoft.DBforPostgreSQL' || namespace=='Microsoft.Cache' || namespace=='Microsoft.KeyVault' || namespace=='Microsoft.OperationalInsights'].{Namespace:namespace, State:registrationState}" -o table
+```
+
+**Nota:** El registro puede tardar varios minutos. El estado cambiará de `Registering` a `Registered` cuando esté completo. Puedes continuar con otros pasos mientras se completan los registros, pero necesitarás que todos estén en estado `Registered` antes de ejecutar el despliegue.
 
 ### Configuración del Proyecto
 
@@ -438,12 +464,19 @@ Si necesitas nodos customizados, puedes crear una imagen personalizada:
 
 #### 1. Crear Azure Container Registry
 
+**Importante:** Asegúrate de que el proveedor `Microsoft.ContainerRegistry` esté registrado antes de crear el ACR (ver sección anterior).
+
 ```powershell
 # Crear un grupo de recursos para el registry
 az group create --name rg-container-registry --location eastus
 
 # Crear Azure Container Registry
+# Nota: El nombre del registry debe ser único globalmente en Azure
 az acr create --resource-group rg-container-registry --name tu-registry --sku Basic
+
+# Si aparece un error de registro de proveedor, ejecuta:
+# az provider register --namespace Microsoft.ContainerRegistry
+# y espera a que el estado sea "Registered"
 
 # Obtener credenciales del registry
 az acr credential show --name tu-registry
